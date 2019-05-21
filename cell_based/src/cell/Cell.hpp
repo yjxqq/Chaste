@@ -136,6 +136,11 @@ protected:
     /** The time it takes for a cell to fully undergo apoptosis. Has units of hours. */
     double mApoptosisTime;
 
+    /** My changes The time we want the cell to stop proliferate behavior. */
+    double mStopProliferateTime;
+
+    double mMyosinActivity;
+
     /** Whether the cell is currently in apoptosis - don't divide. */
     bool mUndergoingApoptosis;
 
@@ -416,6 +421,28 @@ public:
      * @return The cell identifier.
      */
     unsigned GetCellId() const;
+
+    /** My method */
+    void SetStopProliferateTime(double stopProliferateTime)
+    {
+    	mStopProliferateTime = stopProliferateTime;
+    }
+
+    double GetStopProliferateTime()
+    {
+    	return mStopProliferateTime;
+    }
+
+    void SetMyosinActivity(double myosinActivity)
+    {
+    	mMyosinActivity = myosinActivity;
+    }
+
+    double GetMyosinActivity()
+    {
+    	return mMyosinActivity;
+    }
+
 };
 
 

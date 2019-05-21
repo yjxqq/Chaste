@@ -65,19 +65,20 @@ public:
     void TestMonolayer()
     {
         
-    	HoneycombVertexMeshGenerator generator(3, 3);    // Parameters are: cells across, cells up
+    	HoneycombVertexMeshGenerator generator(5, 5);    // Parameters are: cells across, cells up
         MutableVertexMesh<2,2>* p_mesh = generator.GetMesh();
 
         std::vector<CellPtr> cells;
         MAKE_PTR(TransitCellProliferativeType, p_transit_type);
         CellsGenerator<UniformG1GenerationalCellCycleModel, 2> cells_generator;
-        cells_generator.GenerateBasicRandom(cells, p_mesh->GetNumElements(), p_transit_type);
+        double stop_proliferate_time = 10.0;
+        cells_generator.GenerateBasicRandomWithStopProliferateTime(cells, p_mesh->GetNumElements(), stop_proliferate_time, p_transit_type);
 
         VertexBasedCellPopulation<2> cell_population(*p_mesh, cells);
       
         OffLatticeSimulation<2> simulator(cell_population);
         simulator.SetOutputDirectory("MyVertexBasedSimulation");
-        simulator.SetEndTime(15.0);
+        simulator.SetEndTime(20.0);
         
         simulator.SetSamplingTimestepMultiple(50);
 
@@ -88,9 +89,9 @@ public:
         simulator.AddSimulationModifier(p_growth_modifier);
 
         c_vector<double, 2> centre = zero_vector<double>(2);
-        centre[0]=1.5;
-        centre[1]=1.5;
-        double radius = 2.2;
+        centre[0]=2.5;
+        centre[1]=2.5;
+        double radius = 3.6;
         MAKE_PTR_ARGS(MyCircleBoundaryCondition, p_bc, (&cell_population, centre, radius));
         simulator.AddCellPopulationBoundaryCondition(p_bc);
 

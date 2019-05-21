@@ -55,6 +55,7 @@ Cell::Cell(boost::shared_ptr<AbstractCellProperty> pMutationState,
       mDeathTime(DBL_MAX), // This has to be initialised for archiving
       mStartOfApoptosisTime(DBL_MAX),
       mApoptosisTime(0.25), // cell takes 15 min to fully undergo apoptosis
+	  mMyosinActivity(1.0), // My changes
       mUndergoingApoptosis(false),
       mIsDead(false),
       mIsLogged(false)
@@ -444,6 +445,7 @@ unsigned Cell::GetCellId() const
 bool Cell::ReadyToDivide()
 {
     assert(!IsDead());
+
     if (mUndergoingApoptosis || HasCellProperty<ApoptoticCellProperty>())
     {
         return false;
@@ -453,6 +455,13 @@ bool Cell::ReadyToDivide()
     mpSrnModel->SimulateToCurrentTime();
     // This in turn runs any simulations within the CCM through ReadyToDivide();
     mCanDivide = mpCellCycleModel->ReadyToDivide();
+
+    /** My change */
+    double current_time = SimulationTime::Instance()->GetTime();
+    if (current_time>=mStopProliferateTime)
+    {
+    	mCanDivide = false;
+    }
 
     return mCanDivide;
 }
@@ -506,6 +515,9 @@ CellPtr Cell::Divide()
 
     // Set the daughter cell to inherit the apoptosis time of the parent cell
     p_new_cell->SetApoptosisTime(mApoptosisTime);
+
+    // My change
+    p_new_cell->SetStopProliferateTime(mStopProliferateTime);
 
     return p_new_cell;
 }
