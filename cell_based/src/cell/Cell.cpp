@@ -518,6 +518,7 @@ CellPtr Cell::Divide()
 
     // My change
     p_new_cell->SetStopProliferateTime(mStopProliferateTime);
+    p_new_cell->SetMyosinActivity(mMyosinActivity);
 
     return p_new_cell;
 }

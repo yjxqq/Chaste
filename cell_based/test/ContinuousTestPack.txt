@@ -94,3 +94,4 @@ tutorial/TestRunningTumourSpheroidSimulationsTutorial.hpp
 tutorial/TestRunningVertexBasedSimulationsTutorial.hpp
 tutorial/TestVisualizingWithParaviewTutorial.hpp
 my_tests/TestMyVertexBasedSimulation.hpp
+my_tests/TestMyVertexBasedSimulationOscillatoryMorphodynamics.hpp
