@@ -68,6 +68,9 @@ private:
      * two cells.
      */
     std::vector<bool> mOrientations;
+    
+    // My changes.
+    std::vector<double> mSurfaceAreaHistory;
 
     /** Needed for serialization. */
     friend class boost::serialization::access;
@@ -169,6 +172,18 @@ public:
      * @param index the index of the face
      */
     bool FaceIsOrientatedClockwise(unsigned index) const;
+    
+    // My changes.
+    double GetHistoricSurfaceArea()
+    	{
+        	return mSurfaceAreaHistory.front();
+    	}
+    
+    void UpdateSurfaceAreaHistory(double currentSurfaceArea)
+        {
+        	mSurfaceAreaHistory.erase(mSurfaceAreaHistory.begin());
+        	mSurfaceAreaHistory.push_back(currentSurfaceArea);
+        }
 };
 
 
