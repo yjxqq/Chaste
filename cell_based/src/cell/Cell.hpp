@@ -114,6 +114,8 @@ private:
         archive & mApoptosisTime;
         archive & mIsDead;
         archive & mIsLogged;
+        archive & mStopProliferateTime;
+        archive & mMyosinActivity;
     }
 
 protected:
@@ -424,24 +426,24 @@ public:
     
     // My changes.
     void SetStopProliferateTime(double stopProliferateTime)
-        {
-        	mStopProliferateTime = stopProliferateTime;
-        }
+    {
+        mStopProliferateTime = stopProliferateTime;
+    }
     
     double GetStopProliferateTime()
-    	{
-    		return mStopProliferateTime;
-    	}
+    {
+        return mStopProliferateTime;
+    }
 
     void SetMyosinActivity(double myosinActivity)
-    	{
-    		mMyosinActivity = myosinActivity;
-    	}
+    {
+        mMyosinActivity = myosinActivity;
+    }
 
     double GetMyosinActivity()
-    	{
-    		return mMyosinActivity;
-    	}
+    {
+        return mMyosinActivity;
+    }
 
 };
 

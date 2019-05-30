@@ -33,28 +33,15 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-
 #ifndef MYCIRCLEBOUNDARYCONDITION_HPP_
 #define MYCIRCLEBOUNDARYCONDITION_HPP_
 
-#include <cxxtest/TestSuite.h>
-#include "CheckpointArchiveTypes.hpp"
-#include "AbstractCellBasedTestSuite.hpp"
-
 #include "AbstractCellPopulationBoundaryCondition.hpp"
-#include "OffLatticeSimulation.hpp"
-#include "HoneycombMeshGenerator.hpp"
-#include "HoneycombVertexMeshGenerator.hpp"
-#include "VertexBasedCellPopulation.hpp"
-#include "CellsGenerator.hpp"
-#include "FixedG1GenerationalCellCycleModel.hpp"
-#include "GeneralisedLinearSpringForce.hpp"
-#include "SmartPointers.hpp"
-#include "FakePetscSetup.hpp"
 
 class MyCircleBoundaryCondition : public AbstractCellPopulationBoundaryCondition<2>
 {
 private:
+
     c_vector<double, 2> mCentre;
 
     double mRadius;
@@ -69,68 +56,17 @@ private:
 public:
 
     MyCircleBoundaryCondition(AbstractCellPopulation<2>* pCellPopulation,
-    		c_vector<double, 2> centre,
-			double radius)
-        : AbstractCellPopulationBoundaryCondition<2>(pCellPopulation),
-		  mCentre(centre),
-		  mRadius(radius)
-    {
-    	assert(radius>0.0);
+                              c_vector<double, 2> centre,
+                              double radius);
 
-    	if (dynamic_cast<VertexBasedCellPopulation<2>*>(this->mpCellPopulation)==nullptr)
-    	{
-    		EXCEPTION("A VertexBasedCellPopulation must be used with this boundary condition object.");
-    	}
-    }
+    void ImposeBoundaryCondition(const std::map<Node<2>*, c_vector<double, 2> >& rOldLocations);
 
-    void ImposeBoundaryCondition(const std::map<Node<2>*, c_vector<double, 2> >& rOldLocations)
-    {
+    bool VerifyBoundaryCondition();
 
-    	unsigned num_nodes = this->mpCellPopulation->GetNumNodes();
-        for (unsigned node_index=0; node_index<num_nodes; node_index++)
-        {
-            Node<2>* p_node = this->mpCellPopulation->GetNode(node_index);
-            c_vector<double, 2> node_location = p_node->rGetLocation();
-            double signed_distance = norm_2(node_location-mCentre)-mRadius;
-            if (signed_distance>0.0)
-            {
-            	c_vector<double, 2> nearest_location = mCentre+mRadius*(node_location-mCentre)/norm_2(node_location-mCentre);
-            	p_node->rGetModifiableLocation()=nearest_location;
-            }
-
-        }
-    }
-
-    bool VerifyBoundaryCondition()
-    {
-        bool condition_satisfied = true;
-
-    	unsigned num_nodes=this->mpCellPopulation->GetNumNodes();
-        for (unsigned node_index=0; node_index<num_nodes; node_index++)
-        {
-            Node<2>* p_node = this->mpCellPopulation->GetNode(node_index);
-            c_vector<double, 2> node_location = p_node->rGetLocation();
-
-            double signed_distance = norm_2(node_location-mCentre)-mRadius;
-            if (signed_distance>1e-5)
-            {
-            	condition_satisfied = false;
-            	break;
-            }
-        }
-
-        return condition_satisfied;
-    }
-
-    void OutputCellPopulationBoundaryConditionParameters(out_stream& rParamsFile)
-    {
-        AbstractCellPopulationBoundaryCondition<2>::OutputCellPopulationBoundaryConditionParameters(rParamsFile);
-    }
+    void OutputCellPopulationBoundaryConditionParameters(out_stream& rParamsFile);
 };
 
 #include "SerializationExportWrapper.hpp"
-CHASTE_CLASS_EXPORT(MyCircleBoundaryCondition)
-#include "SerializationExportWrapperForCpp.hpp"
 CHASTE_CLASS_EXPORT(MyCircleBoundaryCondition)
 
 namespace boost
@@ -155,7 +91,7 @@ namespace boost
             c_vector<double, 2> centre;
             for (unsigned i=0; i<2; i++)
             {
-            	ar >> centre[i];
+                ar >> centre[i];
             }
             double radius;
             ar >> radius;

@@ -91,6 +91,7 @@ private:
         // This needs to be first so that MeshBasedCellPopulation::Validate() doesn't go mental.
         archive & mFaces;
         archive & mOrientations;
+        archive & mSurfaceAreaHistory;
         archive & boost::serialization::base_object<MutableElement<ELEMENT_DIM, SPACE_DIM> >(*this);
     }
 

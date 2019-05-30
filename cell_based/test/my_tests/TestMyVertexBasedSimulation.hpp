@@ -64,8 +64,7 @@ public:
     
     void TestMonolayer()
     {
-        
-    	HoneycombVertexMeshGenerator generator(5, 5);    // Parameters are: cells across, cells up
+        HoneycombVertexMeshGenerator generator(5, 5);    // Parameters are: cells across, cells up
         MutableVertexMesh<2,2>* p_mesh = generator.GetMesh();
 
         std::vector<CellPtr> cells;

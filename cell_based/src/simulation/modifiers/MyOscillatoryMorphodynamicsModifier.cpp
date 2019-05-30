@@ -34,6 +34,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "MyOscillatoryMorphodynamicsModifier.hpp"
+#include "VertexElement.hpp"
+#include "VertexBasedCellPopulation.hpp"
+#include <math.h>
 
 MyOscillatoryMorphodynamicsModifier::MyOscillatoryMorphodynamicsModifier()
     : AbstractCellBasedSimulationModifier<2>(),
@@ -52,11 +55,6 @@ void MyOscillatoryMorphodynamicsModifier::UpdateAtEndOfTimeStep(AbstractCellPopu
 
 void MyOscillatoryMorphodynamicsModifier::SetupSolve(AbstractCellPopulation<2, 2>& rCellPopulation, std::string outputDirectory)
 {
-    /*
-     * We must update CellData in SetupSolve(), otherwise it will not have been
-     * fully initialised by the time we enter the main time loop.
-     */
-	UpdateMyosinActivitiesAndSurfaceAreaHistories(rCellPopulation);
 }
 
 
@@ -82,30 +80,25 @@ void MyOscillatoryMorphodynamicsModifier::OutputSimulationModifierParameters(out
 // My changes
 void MyOscillatoryMorphodynamicsModifier::UpdateMyosinActivitiesAndSurfaceAreaHistories(AbstractCellPopulation<2,2>& rCellPopulation)
 {
-	VertexBasedCellPopulation<2>* p_cell_population = static_cast<VertexBasedCellPopulation<2>*> (&rCellPopulation);
-	for (typename VertexMesh<2,2>::VertexElementIterator elem_iter = p_cell_population->rGetMesh().GetElementIteratorBegin();
-			elem_iter != p_cell_population->rGetMesh().GetElementIteratorEnd();
-			++ elem_iter)
-	{
-		unsigned elem_index = elem_iter->GetIndex();
-		double previous_element_primeter = elem_iter->GetHistoricSurfaceArea();
-		CellPtr p_cell= p_cell_population->GetCellUsingLocationIndex(elem_index);
-		double myosin_activity = p_cell->GetMyosinActivity();
+    VertexBasedCellPopulation<2>* p_cell_population = static_cast<VertexBasedCellPopulation<2>*> (&rCellPopulation);
+    for (typename VertexMesh<2,2>::VertexElementIterator elem_iter = p_cell_population->rGetMesh().GetElementIteratorBegin();
+            elem_iter != p_cell_population->rGetMesh().GetElementIteratorEnd();
+            ++ elem_iter)
+    {
+        unsigned elem_index = elem_iter->GetIndex();
+        double previous_element_primeter = elem_iter->GetHistoricSurfaceArea();
+        CellPtr p_cell= p_cell_population->GetCellUsingLocationIndex(elem_index);
+        double myosin_activity = p_cell->GetMyosinActivity();
 
-		double new_myosin_activity = myosin_activity+ SimulationTime::Instance()->GetTimeStep()*(2.0*pow(previous_element_primeter,8.0)/(pow(2.063,8.0)+pow(previous_element_primeter,8.0))-myosin_activity);
+        double new_myosin_activity = myosin_activity+ SimulationTime::Instance()->GetTimeStep()*(2.0*pow(previous_element_primeter,8.0)/(pow(2.063,8.0)+pow(previous_element_primeter,8.0))-myosin_activity);
 
-		// Update MyosinActivity
-		p_cell->SetMyosinActivity(new_myosin_activity);
+        // Update MyosinActivity
+        p_cell->SetMyosinActivity(new_myosin_activity);
 
-		// Update SurfaceAreaHistory
-		elem_iter->UpdateSurfaceAreaHistory(p_cell_population->rGetMesh().GetSurfaceAreaOfElement(elem_index));
-	}
+        // Update SurfaceAreaHistory
+        elem_iter->UpdateSurfaceAreaHistory(p_cell_population->rGetMesh().GetSurfaceAreaOfElement(elem_index));
+    }
 }
-
-// Explicit instantiation ??
-//template class MyOscillatoryMorphodynamicsModifier<1>;
-//template class MyOscillatoryMorphodynamicsModifier<2>;
-//template class MyOscillatoryMorphodynamicsModifier<3>;
 
 #include "SerializationExportWrapperForCpp.hpp"
 CHASTE_CLASS_EXPORT(MyOscillatoryMorphodynamicsModifier)

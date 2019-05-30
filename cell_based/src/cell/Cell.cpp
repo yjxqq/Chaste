@@ -58,7 +58,8 @@ Cell::Cell(boost::shared_ptr<AbstractCellProperty> pMutationState,
       mUndergoingApoptosis(false),
       mIsDead(false),
       mIsLogged(false),
-	  mMyosinActivity(1.0) // My changes.
+      mStopProliferateTime(10.0), // My changes.
+      mMyosinActivity(1.0) // My changes.
 {
     if (SimulationTime::Instance()->IsStartTimeSetUp()==false)
     {
@@ -459,7 +460,7 @@ bool Cell::ReadyToDivide()
     double current_time = SimulationTime::Instance()->GetTime();
     if (current_time>=mStopProliferateTime)
     {
-    	mCanDivide = false;
+        mCanDivide = false;
     }
 
     return mCanDivide;
@@ -514,7 +515,7 @@ CellPtr Cell::Divide()
 
     // Set the daughter cell to inherit the apoptosis time of the parent cell
     p_new_cell->SetApoptosisTime(mApoptosisTime);
-    
+
     // My changes.
     p_new_cell->SetStopProliferateTime(mStopProliferateTime);
     p_new_cell->SetMyosinActivity(mMyosinActivity);

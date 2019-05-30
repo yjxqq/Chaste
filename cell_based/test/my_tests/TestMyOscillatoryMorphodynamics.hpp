@@ -46,20 +46,14 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SmartPointers.hpp"
 #include "UniformG1GenerationalCellCycleModel.hpp"
 #include "HoneycombVertexMeshGenerator.hpp"
-#include "ToroidalHoneycombVertexMeshGenerator.hpp"
-#include "CylindricalHoneycombVertexMeshGenerator.hpp"
 #include "VertexBasedCellPopulation.hpp"
-#include "NagaiHondaForce.hpp"
 #include "SimpleTargetAreaModifier.hpp"
-#include "PlaneBoundaryCondition.hpp"
-#include "PlaneBasedCellKiller.hpp"
 
 #include "FakePetscSetup.hpp"
 
-#include "MyCircleBoundaryCondition.hpp"
 #include "MyOscillatoryMorphodynamicsForce.hpp"
 #include "MyOscillatoryMorphodynamicsModifier.hpp"
-#include "MyForce.hpp"
+#include "MyCircleBoundaryCondition.hpp"
 
 class TestMyOscillatoryMorphodynamics : public AbstractCellBasedTestSuite
 {
@@ -67,8 +61,7 @@ public:
     
     void TestOscillation()
     {
-        
-    	HoneycombVertexMeshGenerator generator(5, 5);    // Parameters are: cells across, cells up
+        HoneycombVertexMeshGenerator generator(5, 5);    // Parameters are: cells across, cells up
         MutableVertexMesh<2,2>* p_mesh = generator.GetMesh();
 
         std::vector<CellPtr> cells;
@@ -81,20 +74,18 @@ public:
 
         OffLatticeSimulation<2> simulator(cell_population);
         simulator.SetOutputDirectory("MyOscillatoryMorphodynamics");
-        simulator.SetEndTime(12.0);
+        simulator.SetEndTime(25.0);
         
         simulator.SetSamplingTimestepMultiple(50);
 
-        //MAKE_PTR(NagaiHondaForce<2>, p_force);
-        MAKE_PTR(MyForce<2>, p_force);
-        //MAKE_PTR(MyOscillatoryMorphodynamicsForce<2>, p_force);
+        MAKE_PTR(MyOscillatoryMorphodynamicsForce<2>, p_force);
         simulator.AddForce(p_force);
        
         MAKE_PTR(SimpleTargetAreaModifier<2>, p_growth_modifier);
         simulator.AddSimulationModifier(p_growth_modifier);
 
-        //MAKE_PTR(MyOscillatoryMorphodynamicsModifier, p_my_modifier);
-        //simulator.AddSimulationModifier(p_my_modifier);
+        MAKE_PTR(MyOscillatoryMorphodynamicsModifier, p_my_modifier);
+        simulator.AddSimulationModifier(p_my_modifier);
 
         c_vector<double, 2> centre = zero_vector<double>(2);
         centre[0]=2.5;

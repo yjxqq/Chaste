@@ -39,9 +39,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
 #include "AbstractCellBasedSimulationModifier.hpp"
-#include "VertexElement.hpp"
-#include "VertexBasedCellPopulation.hpp"
-#include <math.h>
 
 class MyOscillatoryMorphodynamicsModifier : public AbstractCellBasedSimulationModifier<2,2>
 {
