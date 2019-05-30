@@ -58,7 +58,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class TestMyOscillatoryMorphodynamics : public AbstractCellBasedTestSuite
 {
 public:
-    
+
     void TestOscillation()
     {
         HoneycombVertexMeshGenerator generator(5, 5);    // Parameters are: cells across, cells up
@@ -67,20 +67,21 @@ public:
         std::vector<CellPtr> cells;
         MAKE_PTR(TransitCellProliferativeType, p_transit_type);
         CellsGenerator<UniformG1GenerationalCellCycleModel, 2> cells_generator;
-        double stop_proliferate_time = 10.0;
+        double stop_proliferate_time = 30.0;
         cells_generator.GenerateBasicRandomWithStopProliferateTime(cells, p_mesh->GetNumElements(), stop_proliferate_time, p_transit_type);
 
         VertexBasedCellPopulation<2> cell_population(*p_mesh, cells);
 
         OffLatticeSimulation<2> simulator(cell_population);
         simulator.SetOutputDirectory("MyOscillatoryMorphodynamics");
-        simulator.SetEndTime(25.0);
-        
-        simulator.SetSamplingTimestepMultiple(50);
+        simulator.SetEndTime(50.0);
+        simulator.SetDt(0.02);
+
+        simulator.SetSamplingTimestepMultiple(5);
 
         MAKE_PTR(MyOscillatoryMorphodynamicsForce<2>, p_force);
         simulator.AddForce(p_force);
-       
+
         MAKE_PTR(SimpleTargetAreaModifier<2>, p_growth_modifier);
         simulator.AddSimulationModifier(p_growth_modifier);
 

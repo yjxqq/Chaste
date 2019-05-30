@@ -38,13 +38,13 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template<unsigned DIM>
 MyOscillatoryMorphodynamicsForce<DIM>::MyOscillatoryMorphodynamicsForce()
    : AbstractForce<DIM>(),
-     mNagaiHondaDeformationEnergyParameter(100.0), // This is 1.0 in the Nagai & Honda paper.
-     mNagaiHondaMembraneSurfaceEnergyParameter(10.0), // This is 0.1 in the Nagai & Honda paper.
-     mNagaiHondaCellCellAdhesionEnergyParameter(0.5), // This corresponds to a value of 1.0 for
+     mNagaiHondaDeformationEnergyParameter(5.0), // This is 1.0 in the Nagai & Honda paper.
+     mNagaiHondaMembraneSurfaceEnergyParameter(0.5), // This is 0.1 in the Nagai & Honda paper.
+     mNagaiHondaCellCellAdhesionEnergyParameter(0.0), // This corresponds to a value of 1.0 for
                                                       // the sigma parameter in the Nagai & Honda
                                                       // paper. In the paper, the sigma value is
                                                       // set to 0.01.
-     mNagaiHondaCellBoundaryAdhesionEnergyParameter(1.0) // This is 0.01 in the Nagai & Honda paper.
+     mNagaiHondaCellBoundaryAdhesionEnergyParameter(0.0) // This is 0.01 in the Nagai & Honda paper.
 {
 }
 
@@ -156,11 +156,10 @@ void MyOscillatoryMorphodynamicsForce<DIM>::AddForceContribution(AbstractCellPop
             double cell_target_perimeter = 2*sqrt(M_PI*target_areas[elem_index]);
 
             // My changes
-            //cell_target_perimeter = 0.0;
+            cell_target_perimeter = 0.0;
 
             CellPtr p_cell = p_cell_population->GetCellUsingLocationIndex(elem_index);
             double myosin_activity = p_cell->GetMyosinActivity();
-            //double myosin_activity = 1.0;
 
             membrane_surface_tension_contribution -= 2*GetNagaiHondaMembraneSurfaceEnergyParameter()*myosin_activity*(element_perimeters[elem_index] - cell_target_perimeter)*element_perimeter_gradient;
         }

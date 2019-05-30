@@ -58,7 +58,7 @@ VertexElement<ELEMENT_DIM, SPACE_DIM>::VertexElement(unsigned index,
     }
     
     // My changes.
-    mSurfaceAreaHistory = std::vector<double> (5, 0.6204*6.0);
+    mSurfaceAreaHistory = std::vector<double> (50, 0.6204*6.0);
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -94,7 +94,7 @@ VertexElement<ELEMENT_DIM, SPACE_DIM>::VertexElement(unsigned index,
     this->RegisterWithNodes();
     
     // My changes.
-    mSurfaceAreaHistory = std::vector<double> (5, 0.6204*6.0);
+    mSurfaceAreaHistory = std::vector<double> (50, 0.6204*6.0);
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -102,7 +102,7 @@ VertexElement<ELEMENT_DIM, SPACE_DIM>::VertexElement(unsigned index)
     : MutableElement<ELEMENT_DIM, SPACE_DIM>(index)
 {
     // My changes.
-    mSurfaceAreaHistory = std::vector<double> (5, 0.6204*6.0);
+    mSurfaceAreaHistory = std::vector<double> (50, 0.6204*6.0);
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -111,7 +111,7 @@ VertexElement<ELEMENT_DIM, SPACE_DIM>::VertexElement(unsigned index,
     : MutableElement<ELEMENT_DIM, SPACE_DIM>(index, rNodes)
 {
     // My changes.
-    mSurfaceAreaHistory = std::vector<double> (5, 0.6204*6.0);
+    mSurfaceAreaHistory = std::vector<double> (50, 0.6204*6.0);
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
