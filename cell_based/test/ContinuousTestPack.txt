@@ -95,3 +95,5 @@ tutorial/TestRunningVertexBasedSimulationsTutorial.hpp
 tutorial/TestVisualizingWithParaviewTutorial.hpp
 my_tests/TestMyVertexBasedSimulation.hpp
 my_tests/TestMyOscillatoryMorphodynamics.hpp
+my_tests/TestMyEdgeMyosinActivity.hpp
+my_tests/TestMyPeriodicSimulation.hpp

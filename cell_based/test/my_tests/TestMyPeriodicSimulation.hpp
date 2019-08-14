@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2005-2018, University of Oxford.
+Copyright (c) 2005-2019, University of Oxford.
 All rights reserved.
 
 University of Oxford means the Chancellor, Masters and Scholars of the
@@ -32,9 +32,17 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+/*
+ *
+ *  Chaste tutorial - this page gets automatically changed to a wiki page
+ *  DO NOT remove the comments below, and if the code has to be changed in
+ *  order to run, please check the comments are still accurate
+ *
+ *
+ */
 
-#ifndef TESTMYOSCILLATORYMORPHODYNAMICS_HPP_
-#define TESTMYOSCILLATORYMORPHODYNAMICS_HPP_
+#ifndef TESTRUNNINGVERTEXBASEDSIMULATIONSTUTORIAL_HPP_
+#define TESTRUNNINGVERTEXBASEDSIMULATIONSTUTORIAL_HPP_
 
 #include <cxxtest/TestSuite.h>
 #include "CheckpointArchiveTypes.hpp"
@@ -46,52 +54,57 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SmartPointers.hpp"
 #include "UniformG1GenerationalCellCycleModel.hpp"
 #include "HoneycombVertexMeshGenerator.hpp"
+#include "CylindricalHoneycombVertexMeshGenerator.hpp"
 #include "VertexBasedCellPopulation.hpp"
+#include "NagaiHondaForce.hpp"
 #include "SimpleTargetAreaModifier.hpp"
+#include "PlaneBoundaryCondition.hpp"
+#include "PlaneBasedCellKiller.hpp"
 
 #include "FakePetscSetup.hpp"
 
-#include "MyOscillatoryMorphodynamicsForce.hpp"
-#include "MyOscillatoryMorphodynamicsModifier.hpp"
-#include "MyCircleBoundaryCondition.hpp"
 #include "ToroidalHoneycombVertexMeshGenerator.hpp"
 
-class TestMyOscillatoryMorphodynamics : public AbstractCellBasedTestSuite
+
+class TestMyPeriodicSimulation : public AbstractCellBasedTestSuite
 {
 public:
 
-    void TestOscillation()
+    void TestPeriodicMonolayer()
     {
-        ToroidalHoneycombVertexMeshGenerator generator(4, 4, 0.01, 0.001, 1-0.4*sqrt(3));    // Parameters are: cells across, cells up
+        ToroidalHoneycombVertexMeshGenerator generator(6, 6, 0.01, 0.001, 0.5*sqrt(3)+0.01);    // Parameters are: cells across, cells up 1-0.4*sqrt(3)
         Toroidal2dVertexMesh* p_mesh = generator.GetToroidalMesh();
 
         std::vector<CellPtr> cells;
         MAKE_PTR(TransitCellProliferativeType, p_transit_type);
         CellsGenerator<UniformG1GenerationalCellCycleModel, 2> cells_generator;
-        double stop_proliferate_time = 10.0;
+        double stop_proliferate_time = 0.00001;
         cells_generator.GenerateBasicRandomWithStopProliferateTime(cells, p_mesh->GetNumElements(), stop_proliferate_time, p_transit_type);
+        //cells_generator.GenerateBasicRandom(cells, p_mesh->GetNumElements(), p_transit_type);
 
         VertexBasedCellPopulation<2> cell_population(*p_mesh, cells);
 
         OffLatticeSimulation<2> simulator(cell_population);
-        simulator.SetOutputDirectory("MyOscillatoryMorphodynamics");
-        simulator.SetEndTime(50.0);
-        simulator.SetDt(0.02);
+        simulator.SetOutputDirectory("MyPeriodicSimulation");
+        simulator.SetSamplingTimestepMultiple(50);
+        simulator.SetEndTime(10.0);
 
-        simulator.SetSamplingTimestepMultiple(5);
-
-        MAKE_PTR(MyOscillatoryMorphodynamicsForce<2>, p_force);
+        MAKE_PTR(NagaiHondaForce<2>, p_force);
         simulator.AddForce(p_force);
 
         MAKE_PTR(SimpleTargetAreaModifier<2>, p_growth_modifier);
         simulator.AddSimulationModifier(p_growth_modifier);
 
-        MAKE_PTR(MyOscillatoryMorphodynamicsModifier, p_my_modifier);
-        simulator.AddSimulationModifier(p_my_modifier);
+        /*c_vector<double,2> point = zero_vector<double>(2);
+        c_vector<double,2> normal = zero_vector<double>(2);
+        normal(1) = -1.0;
+        MAKE_PTR_ARGS(PlaneBoundaryCondition<2>, p_bc, (&cell_population, point, normal));
+        simulator.AddCellPopulationBoundaryCondition(p_bc);*/
+
 
         simulator.Solve();
-    }
 
+    }
 };
 
-#endif /* TESTMYOSCILLATORYMORPHODYNAMICS_HPP_ */
+#endif /* TESTRUNNINGVERTEXBASEDSIMULATIONSTUTORIAL_HPP_ */

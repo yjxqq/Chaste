@@ -43,6 +43,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "T2SwapCellKiller.hpp"
 #include "ApoptoticCellProperty.hpp"
 #include "CellPopulationElementWriter.hpp"
+#include "CellPopulationElementMyosinActivityWriter.hpp"
+
 #include "VertexT1SwapLocationsWriter.hpp"
 #include "VertexT2SwapLocationsWriter.hpp"
 #include "VertexT3SwapLocationsWriter.hpp"
@@ -479,6 +481,7 @@ void VertexBasedCellPopulation<DIM>::OpenWritersFiles(OutputFileHandler& rOutput
         if (!this-> template HasWriter<CellPopulationElementWriter>())
         {
             this-> template AddPopulationWriter<CellPopulationElementWriter>();
+            this-> template AddPopulationWriter<CellPopulationElementMyosinActivityWriter>();
         }
     }
 

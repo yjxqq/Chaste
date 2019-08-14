@@ -493,6 +493,9 @@ void AbstractCellBasedSimulation<ELEMENT_DIM,SPACE_DIM>::Solve()
         // Increment simulation time here, so results files look sensible
         p_simulation_time->IncrementTimeOneStep();
 
+        // My changes.
+        UpdateCellPopulation();
+
         // Call UpdateAtEndOfTimeStep() on each modifier
         CellBasedEventHandler::BeginEvent(CellBasedEventHandler::UPDATESIMULATION);
         for (typename std::vector<boost::shared_ptr<AbstractCellBasedSimulationModifier<ELEMENT_DIM, SPACE_DIM> > >::iterator iter = mSimulationModifiers.begin();

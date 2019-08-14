@@ -33,8 +33,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef TESTMYOSCILLATORYMORPHODYNAMICS_HPP_
-#define TESTMYOSCILLATORYMORPHODYNAMICS_HPP_
+#ifndef TESTMYEDGEMYOSINACTIVITY_HPP_
+#define TESTMYEDGEMYOSINACTIVITY_HPP_
 
 #include <cxxtest/TestSuite.h>
 #include "CheckpointArchiveTypes.hpp"
@@ -51,18 +51,19 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FakePetscSetup.hpp"
 
-#include "MyOscillatoryMorphodynamicsForce.hpp"
-#include "MyOscillatoryMorphodynamicsModifier.hpp"
+#include "MyEdgeMyosinActivityForce.hpp"
+#include "MyEdgeMyosinActivityModifier.hpp"
 #include "MyCircleBoundaryCondition.hpp"
+#include "PlaneBoundaryCondition.hpp"
 #include "ToroidalHoneycombVertexMeshGenerator.hpp"
 
-class TestMyOscillatoryMorphodynamics : public AbstractCellBasedTestSuite
+class TestMyEdgeMyosinActivity : public AbstractCellBasedTestSuite
 {
 public:
 
     void TestOscillation()
     {
-        ToroidalHoneycombVertexMeshGenerator generator(4, 4, 0.01, 0.001, 1-0.4*sqrt(3));    // Parameters are: cells across, cells up
+        ToroidalHoneycombVertexMeshGenerator generator(4, 4, 0.01, 0.001, (1-0.4*sqrt(3))*29/16*1.5);    // Parameters are: cells across, cells up
         Toroidal2dVertexMesh* p_mesh = generator.GetToroidalMesh();
 
         std::vector<CellPtr> cells;
@@ -74,19 +75,19 @@ public:
         VertexBasedCellPopulation<2> cell_population(*p_mesh, cells);
 
         OffLatticeSimulation<2> simulator(cell_population);
-        simulator.SetOutputDirectory("MyOscillatoryMorphodynamics");
-        simulator.SetEndTime(50.0);
+        simulator.SetOutputDirectory("MyEdgeMyosinActivity");
+        simulator.SetEndTime(27);
         simulator.SetDt(0.02);
 
         simulator.SetSamplingTimestepMultiple(5);
 
-        MAKE_PTR(MyOscillatoryMorphodynamicsForce<2>, p_force);
+        MAKE_PTR(MyEdgeMyosinActivityForce<2>, p_force);
         simulator.AddForce(p_force);
 
         MAKE_PTR(SimpleTargetAreaModifier<2>, p_growth_modifier);
         simulator.AddSimulationModifier(p_growth_modifier);
 
-        MAKE_PTR(MyOscillatoryMorphodynamicsModifier, p_my_modifier);
+        MAKE_PTR(MyEdgeMyosinActivityModifier, p_my_modifier);
         simulator.AddSimulationModifier(p_my_modifier);
 
         simulator.Solve();
@@ -94,4 +95,4 @@ public:
 
 };
 
-#endif /* TESTMYOSCILLATORYMORPHODYNAMICS_HPP_ */
+#endif /* TESTMYEDGEMYOSINACTIVITY_HPP_ */

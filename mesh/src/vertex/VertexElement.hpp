@@ -72,6 +72,10 @@ private:
     // My changes.
     std::vector<double> mSurfaceAreaHistory;
 
+    std::vector<double> mEdgeMyosinActivities;
+
+    std::vector<std::vector<double>> mEdgeLengthHistory;
+
     /** Needed for serialization. */
     friend class boost::serialization::access;
     /**
@@ -92,6 +96,8 @@ private:
         archive & mFaces;
         archive & mOrientations;
         archive & mSurfaceAreaHistory;
+        archive & mEdgeMyosinActivities;
+        archive & mEdgeLengthHistory;
         archive & boost::serialization::base_object<MutableElement<ELEMENT_DIM, SPACE_DIM> >(*this);
     }
 
@@ -175,16 +181,25 @@ public:
     bool FaceIsOrientatedClockwise(unsigned index) const;
     
     // My changes.
-    double GetHistoricSurfaceArea()
-    	{
-        	return mSurfaceAreaHistory.front();
-    	}
+    double GetHistoricSurfaceArea() const;
     
-    void UpdateSurfaceAreaHistory(double currentSurfaceArea)
-        {
-        	mSurfaceAreaHistory.erase(mSurfaceAreaHistory.begin());
-        	mSurfaceAreaHistory.push_back(currentSurfaceArea);
-        }
+    void UpdateSurfaceAreaHistory(double currentSurfaceArea);
+
+    // My changes
+    double GetEdgeMyosinActivity(unsigned index) const;
+
+    void InitializeEdgeMyosinActivities(double newMyosinActivity);
+
+    void UpdateEdgeMyosinActivity(unsigned index,double newEdgeMyosinActivity);
+
+    void InitializeEdgeLengthHistory();
+
+    void UpdateEdgeLengthHistory(std::vector<double> newEdgeLengths);
+
+    double GetHistoricEdgeLength(unsigned index) const;
+
+    double GetEdgeLength(unsigned index) const;
+
 };
 
 
@@ -229,6 +244,16 @@ public:
      * @param index the index of the face
      */
     bool FaceIsOrientatedClockwise(unsigned index) const;
+
+    // My changes
+    double GetHistoricSurfaceArea() const;
+
+    double GetEdgeMyosinActivity(unsigned index) const;
+
+    double GetHistoricEdgeLength(unsigned index) const;
+
+    double GetEdgeLength(unsigned index) const;
+
 };
 
 #endif /*VERTEXELEMENT_HPP_*/

@@ -38,7 +38,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ToroidalHoneycombVertexMeshGenerator::ToroidalHoneycombVertexMeshGenerator(unsigned numElementsAcross,
    unsigned numElementsUp,
    double cellRearrangementThreshold,
-   double t2Threshold)
+   double t2Threshold,
+   double elementArea)
 {
     // numElementsAcross and numElementsUp must be even for toroidal meshes
     assert(numElementsAcross > 1);
@@ -115,6 +116,9 @@ ToroidalHoneycombVertexMeshGenerator::ToroidalHoneycombVertexMeshGenerator(unsig
     double mesh_height = 1.5*numElementsUp/sqrt(3.0);
 
     mpMesh = new Toroidal2dVertexMesh(mesh_width, mesh_height, nodes, elements, cellRearrangementThreshold, t2Threshold);
+
+    // Scale the mesh so that each element's area takes the value elementArea
+    mpMesh->Scale(sqrt(elementArea*2.0/sqrt(3.0)), sqrt(elementArea*2.0/sqrt(3.0)));
 }
 
 MutableVertexMesh<2,2>* ToroidalHoneycombVertexMeshGenerator::GetMesh()

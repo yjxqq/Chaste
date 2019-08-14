@@ -90,7 +90,12 @@ void MyOscillatoryMorphodynamicsModifier::UpdateMyosinActivitiesAndSurfaceAreaHi
         CellPtr p_cell= p_cell_population->GetCellUsingLocationIndex(elem_index);
         double myosin_activity = p_cell->GetMyosinActivity();
 
-        double new_myosin_activity = myosin_activity+ SimulationTime::Instance()->GetTimeStep()*(2.0*pow(previous_element_primeter,8.0)/(pow(2.063,8.0)+pow(previous_element_primeter,8.0))-myosin_activity);
+        // My changes
+        double new_myosin_activity = 0.0;
+        if (SimulationTime::Instance()->GetTime()<40.0-1e-10)
+            new_myosin_activity = myosin_activity+ SimulationTime::Instance()->GetTimeStep()*(2.0*pow(previous_element_primeter,8.0)/(pow(2.063,8.0)+pow(previous_element_primeter,8.0))-myosin_activity);
+        else
+            new_myosin_activity = myosin_activity;
 
         // Update MyosinActivity
         p_cell->SetMyosinActivity(new_myosin_activity);

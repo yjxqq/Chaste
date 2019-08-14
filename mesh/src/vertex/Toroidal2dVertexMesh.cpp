@@ -365,6 +365,18 @@ void Toroidal2dVertexMesh::ConstructFromMeshReader(AbstractMeshReader<2,2>& rMes
     this->mpMeshForVtk = nullptr;
 }
 
+// My changes
+void Toroidal2dVertexMesh::Scale(const double xScale, const double yScale, const double zScale)
+{
+    assert(zScale == 1.0);
+
+    AbstractMesh<2, 2>::Scale(xScale, yScale);
+
+    // Also rescale the width of the mesh (this effectively scales the domain)
+    mWidth *= xScale;
+    mHeight *= yScale;
+}
+
 // Serialization for Boost >= 1.36
 #include "SerializationExportWrapperForCpp.hpp"
 CHASTE_CLASS_EXPORT(Toroidal2dVertexMesh)

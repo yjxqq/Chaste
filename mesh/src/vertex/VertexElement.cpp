@@ -34,7 +34,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "VertexElement.hpp"
 #include <cassert>
-
+#include <iostream>
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
 VertexElement<ELEMENT_DIM, SPACE_DIM>::VertexElement(unsigned index,
@@ -58,7 +58,10 @@ VertexElement<ELEMENT_DIM, SPACE_DIM>::VertexElement(unsigned index,
     }
     
     // My changes.
-    mSurfaceAreaHistory = std::vector<double> (50, 0.6204*6.0);
+    mSurfaceAreaHistory = std::vector<double> (50, 0.6204*6.0);//0.6204 = Ra
+
+    mEdgeLengthHistory = std::vector<std::vector<double>> (50, std::vector<double> (10, 0.6204));
+//    mEdgeMyosinActivities = std::vector<double> (6, 1.0);
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -95,6 +98,9 @@ VertexElement<ELEMENT_DIM, SPACE_DIM>::VertexElement(unsigned index,
     
     // My changes.
     mSurfaceAreaHistory = std::vector<double> (50, 0.6204*6.0);
+
+    mEdgeLengthHistory = std::vector<std::vector<double>> (50, std::vector<double> (10, 0.6204));
+//    mEdgeMyosinActivities = std::vector<double> (6, 1.0);
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -103,6 +109,9 @@ VertexElement<ELEMENT_DIM, SPACE_DIM>::VertexElement(unsigned index)
 {
     // My changes.
     mSurfaceAreaHistory = std::vector<double> (50, 0.6204*6.0);
+
+    mEdgeLengthHistory = std::vector<std::vector<double>> (50, std::vector<double> (10, 0.6204));
+//    mEdgeMyosinActivities = std::vector<double> (6, 1.0);
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -112,6 +121,9 @@ VertexElement<ELEMENT_DIM, SPACE_DIM>::VertexElement(unsigned index,
 {
     // My changes.
     mSurfaceAreaHistory = std::vector<double> (50, 0.6204*6.0);
+
+    mEdgeLengthHistory = std::vector<std::vector<double>> (50, std::vector<double> (10, 0.6204));
+//    mEdgeMyosinActivities = std::vector<double> (6, 1.0);
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -167,6 +179,87 @@ bool VertexElement<ELEMENT_DIM, SPACE_DIM>::FaceIsOrientatedClockwise(unsigned i
     return mOrientations[index];
 }
 
+// My changes
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+double VertexElement<ELEMENT_DIM, SPACE_DIM>::GetHistoricSurfaceArea() const
+{
+    return mSurfaceAreaHistory.front();
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+void VertexElement<ELEMENT_DIM, SPACE_DIM>::UpdateSurfaceAreaHistory(double currentSurfaceArea)
+{
+    mSurfaceAreaHistory.erase(mSurfaceAreaHistory.begin());
+    mSurfaceAreaHistory.push_back(currentSurfaceArea);
+}
+
+// My changes
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+double VertexElement<ELEMENT_DIM, SPACE_DIM>::GetEdgeMyosinActivity(unsigned index) const
+{
+//std::vector<double>::size_type index_edge = index;
+//if (SimulationTime::Instance()->GetTime() == 31.0)
+//std::cout << mEdgeMyosinActivities.size();
+//std::cout << index_edge;
+    assert(!this-> IsDeleted());
+    //assert(index_edge < mEdgeMyosinActivities.size());
+    return mEdgeMyosinActivities[index];
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+void VertexElement<ELEMENT_DIM, SPACE_DIM>::InitializeEdgeMyosinActivities(double newMyosinActivity)
+{
+    //mEdgeMyosinActivities = std::vector<double> (this->GetNumNodes(), newMyosinActivity);
+    mEdgeMyosinActivities.reserve(this->GetNumNodes());
+    for (unsigned i = 0; i < this->GetNumNodes(); i++)
+    {
+        c_vector<double, SPACE_DIM> point1= this->mNodes[i]->rGetLocation();
+        double xcoord1 = point1[0];
+        c_vector<double, SPACE_DIM> point2= this->mNodes[(i+1)%this->GetNumNodes()]->rGetLocation();
+        double xcoord2 = point2[0];
+        double length = norm_2(point2-point1);
+        double theta = acos((xcoord2-xcoord1)/length);
+        if (theta > M_PI/2)
+            theta = M_PI -theta;
+        mEdgeMyosinActivities[i] = newMyosinActivity*(1.0 + 0.0/M_PI*theta);
+    }
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+void VertexElement<ELEMENT_DIM, SPACE_DIM>::UpdateEdgeMyosinActivity(unsigned index,double newEdgeMyosinActivity)
+{
+    mEdgeMyosinActivities[index] = newEdgeMyosinActivity;
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+void VertexElement<ELEMENT_DIM, SPACE_DIM>::InitializeEdgeLengthHistory()
+{
+    mEdgeLengthHistory = std::vector<std::vector<double>> (50, std::vector<double> (10, 0.6204));
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+void VertexElement<ELEMENT_DIM, SPACE_DIM>::UpdateEdgeLengthHistory(std::vector<double> newEdgeLengths)
+{
+    mEdgeLengthHistory.erase(mEdgeLengthHistory.begin());
+    mEdgeLengthHistory.push_back(newEdgeLengths);
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+double VertexElement<ELEMENT_DIM, SPACE_DIM>::GetHistoricEdgeLength(unsigned index) const
+{
+    //std::vector<double> historic_edge_lengths = mEdgeLengthHistory.front();
+    //return historic_edge_lengths[index];
+    return mEdgeLengthHistory.front()[index];
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+double VertexElement<ELEMENT_DIM, SPACE_DIM>::GetEdgeLength(unsigned index) const
+{
+    std::vector<double> vec = *(--mEdgeLengthHistory.end());
+    return vec[index];
+}
+
 //////////////////////////////////////////////////////////////////////
 //                  Specialization for 1d elements                  //
 //                                                                  //
@@ -201,6 +294,30 @@ bool VertexElement<1, SPACE_DIM>::FaceIsOrientatedClockwise(unsigned index) cons
     return false;
 }
 
+// My changes
+template<unsigned SPACE_DIM>
+double VertexElement<1, SPACE_DIM>::GetHistoricSurfaceArea() const
+{
+    return 0.0;
+}
+
+template<unsigned SPACE_DIM>
+double VertexElement<1, SPACE_DIM>::GetEdgeMyosinActivity(unsigned index) const
+{
+    return 0.0;
+}
+
+template<unsigned SPACE_DIM>
+double VertexElement<1, SPACE_DIM>::GetHistoricEdgeLength(unsigned index) const
+{
+    return 0.0;
+}
+
+template<unsigned SPACE_DIM>
+double VertexElement<1, SPACE_DIM>::GetEdgeLength(unsigned index) const
+{
+    return 0.0;
+}
 
 // Explicit instantiation
 template class VertexElement<1,1>;

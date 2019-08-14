@@ -195,6 +195,9 @@ public:
       * @param height the mesh height
       */
      void ConstructFromMeshReader(AbstractMeshReader<2,2>& rMeshReader, double width, double height);
+
+     // My changes
+     void Scale(const double xScale=1.0, const double yScale=1.0, const double zScale=1.0);
 };
 
 #include "SerializationExportWrapper.hpp"
