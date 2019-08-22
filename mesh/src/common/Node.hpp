@@ -86,6 +86,9 @@ private:
     /** Set of indices of boundary elements containing this node as a vertex. */
     std::set<unsigned> mBoundaryElementIndices;
 
+    // My changes
+    double mRandomForceAngle;
+
     /** Needed for serialization. */
     friend class boost::serialization::access;
     friend class TestNode;
@@ -425,6 +428,11 @@ public:
      * Defaults to 0 if no NodeAttributes have been setup.
      */
     unsigned GetRegion() const;
+
+    // My changes
+    double GetRandomForceAngle();
+
+    void SetRandomForceAngle(double randomForceAngle);
 
     /**
      * An iterator over the indices of elements which contain this node.

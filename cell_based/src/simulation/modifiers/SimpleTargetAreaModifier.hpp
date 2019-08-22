@@ -93,6 +93,8 @@ public:
      */
     SimpleTargetAreaModifier();
 
+    SimpleTargetAreaModifier(double target_Area);
+
     /**
      * Destructor.
      */

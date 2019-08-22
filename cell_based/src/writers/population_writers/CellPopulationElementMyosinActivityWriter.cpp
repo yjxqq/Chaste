@@ -165,7 +165,7 @@ void CellPopulationElementMyosinActivityWriter<ELEMENT_DIM, SPACE_DIM>::Visit(Ve
             double current_time = SimulationTime::Instance()->GetTime();
             double element_area = pCellPopulation->rGetMesh().GetVolumeOfElement(elem_index);
             double element_perimeter = pCellPopulation->rGetMesh().GetSurfaceAreaOfElement(elem_index);
-            if (current_time < 15.0 - 1e-10)
+            if (current_time < 1000.0 - 1e-10)
                 *this->mpOutStream << element_area << ' ' << element_perimeter << ' ' << (*cell_iter)->GetMyosinActivity() << "\t";
             else
             {

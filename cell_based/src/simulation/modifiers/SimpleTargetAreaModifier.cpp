@@ -45,6 +45,14 @@ SimpleTargetAreaModifier<DIM>::SimpleTargetAreaModifier()
 }
 
 template<unsigned DIM>
+SimpleTargetAreaModifier<DIM>::SimpleTargetAreaModifier(double target_Area)
+    : AbstractTargetAreaModifier<DIM>(),
+      mGrowthDuration(DOUBLE_UNSET)
+{
+    this->mReferenceTargetArea = target_Area;
+}
+
+template<unsigned DIM>
 SimpleTargetAreaModifier<DIM>::~SimpleTargetAreaModifier()
 {
 }

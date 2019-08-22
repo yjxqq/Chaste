@@ -222,7 +222,7 @@ void VertexElement<ELEMENT_DIM, SPACE_DIM>::InitializeEdgeMyosinActivities(doubl
         double theta = acos((xcoord2-xcoord1)/length);
         if (theta > M_PI/2)
             theta = M_PI -theta;
-        mEdgeMyosinActivities[i] = newMyosinActivity*(1.0 + 0.0/M_PI*theta);
+        mEdgeMyosinActivities[i] = newMyosinActivity*(0.5 + 2.0/M_PI*theta);
     }
 }
 

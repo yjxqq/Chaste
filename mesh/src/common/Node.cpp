@@ -50,6 +50,8 @@ void Node<SPACE_DIM>::CommonConstructor(unsigned index, bool isBoundaryNode)
     mIsInternal = false;
     mIsDeleted = false;
     mpNodeAttributes = nullptr;
+    // My changes
+    mRandomForceAngle = 2*M_PI*(rand()%100)/100;
 }
 
 template<unsigned SPACE_DIM>
@@ -445,6 +447,22 @@ unsigned Node<SPACE_DIM>::GetRegion() const
 
     return region;
 }
+
+//My changes
+
+template<unsigned SPACE_DIM>
+double Node<SPACE_DIM>::GetRandomForceAngle()
+{
+    return mRandomForceAngle;
+}
+
+
+template<unsigned SPACE_DIM>
+void Node<SPACE_DIM>::SetRandomForceAngle(double randomForceAngle)
+{
+    mRandomForceAngle = randomForceAngle;
+}
+
 
 // Explicit instantiation
 template class Node<1>;

@@ -164,18 +164,18 @@ void MyEdgeMyosinActivityForce<DIM>::AddForceContribution(AbstractCellPopulation
 
             double myosin_activity = 0.0;
 
-            // use Cell Myosin Activity related equation
-            if (current_time < (15.0+1e-10))
+            // Nagai Honda Force
+            if (current_time < (10.0 + 1e-10))
             {
-                // Nagai Honda Force
-                if (current_time < 16.0 -1e-10)
-                    myosin_activity = 1.0;
-                // MA Force
-                else
-                    myosin_activity = p_cell->GetMyosinActivity();
+                membrane_surface_tension_contribution -= 2*GetNagaiHondaMembraneSurfaceEnergyParameter()*1.0*(element_perimeters[elem_index] - cell_target_perimeter)*element_perimeter_gradient;
+            }
+            // MA Force
+            else if (current_time < (50.0 + 1e-10))
+            {
+                myosin_activity = p_cell->GetMyosinActivity();
                 membrane_surface_tension_contribution -= 2*GetNagaiHondaMembraneSurfaceEnergyParameter()*myosin_activity*(element_perimeters[elem_index] - cell_target_perimeter)*element_perimeter_gradient;
             }
-            // use Edge Myosin Activity related equation
+            // EMA Force
             else
             {
                 double sum1 = 0.0;
