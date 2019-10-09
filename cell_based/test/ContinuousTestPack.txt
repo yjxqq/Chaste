@@ -99,3 +99,4 @@ my_tests/TestMyEdgeMyosinActivity.hpp
 my_tests/TestMyPeriodicSimulation.hpp
 my_tests/TestMyEdgeMyosinActivityWithFixedBoundaryCondition.hpp
 my_tests/TestMyStripesAdhesionSimulation.hpp
+my_tests/TestMyVoidEdgeMyosinActivity.hpp

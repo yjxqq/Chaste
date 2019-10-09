@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2005-2018, University of Oxford.
+Copyright (c) 2005-2019, University of Oxford.
 All rights reserved.
 
 University of Oxford means the Chancellor, Masters and Scholars of the
@@ -33,14 +33,14 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "MyEdgeMyosinActivityForce.hpp"
+#include "MyVoidEdgeMyosinActivityForce.hpp"
 
 template<unsigned DIM>
-MyEdgeMyosinActivityForce<DIM>::MyEdgeMyosinActivityForce()
+MyVoidEdgeMyosinActivityForce<DIM>::MyVoidEdgeMyosinActivityForce()
    : AbstractForce<DIM>(),
      mNagaiHondaDeformationEnergyParameter(5.0), // This is 1.0 in the Nagai & Honda paper.
      mNagaiHondaMembraneSurfaceEnergyParameter(0.5), // This is 0.1 in the Nagai & Honda paper.
-     mNagaiHondaCellCellAdhesionEnergyParameter(0.0), // This corresponds to a value of 1.0 for
+     mNagaiHondaCellCellAdhesionEnergyParameter(-1.0), // This corresponds to a value of 1.0 for
                                                       // the sigma parameter in the Nagai & Honda
                                                       // paper. In the paper, the sigma value is
                                                       // set to 0.01.
@@ -49,17 +49,17 @@ MyEdgeMyosinActivityForce<DIM>::MyEdgeMyosinActivityForce()
 }
 
 template<unsigned DIM>
-MyEdgeMyosinActivityForce<DIM>::~MyEdgeMyosinActivityForce()
+MyVoidEdgeMyosinActivityForce<DIM>::~MyVoidEdgeMyosinActivityForce()
 {
 }
 
 template<unsigned DIM>
-void MyEdgeMyosinActivityForce<DIM>::AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation)
+void MyVoidEdgeMyosinActivityForce<DIM>::AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation)
 {
     // Throw an exception message if not using a VertexBasedCellPopulation
     if (dynamic_cast<VertexBasedCellPopulation<DIM>*>(&rCellPopulation) == nullptr)
     {
-        EXCEPTION("NagaiHondaForce is to be used with a VertexBasedCellPopulation only");
+        EXCEPTION("MyVoidEdgeMyosinActivityForce is to be used with a VertexBasedCellPopulation only");
     }
 
     // Define some helper variables
@@ -88,7 +88,7 @@ void MyEdgeMyosinActivityForce<DIM>::AddForceContribution(AbstractCellPopulation
         }
         catch (Exception&)
         {
-            EXCEPTION("You need to add an AbstractTargetAreaModifier to the simulation in order to use NagaiHondaForce");
+            EXCEPTION("You need to add an AbstractTargetAreaModifier to the simulation in order to use MyVoidEdgeMyosinActivityForce");
         }
     }
 
@@ -154,48 +154,7 @@ void MyEdgeMyosinActivityForce<DIM>::AddForceContribution(AbstractCellPopulation
             // Add the force contribution from this cell's membrane surface tension (note the minus sign)
             c_vector<double, DIM> element_perimeter_gradient = previous_edge_gradient + next_edge_gradient;
             double cell_target_perimeter = 2*sqrt(M_PI*target_areas[elem_index]);
-
-            // My changes
-            cell_target_perimeter = 0.0;
-
-            CellPtr p_cell = p_cell_population->GetCellUsingLocationIndex(elem_index);
-
-            double current_time = SimulationTime::Instance()->GetTime();
-
-            double myosin_activity = 0.0;
-
-            // Nagai Honda Force
-            if (current_time < (-10.0 + 1e-10))
-            {
-                membrane_surface_tension_contribution -= 2*GetNagaiHondaMembraneSurfaceEnergyParameter()*1.0*(element_perimeters[elem_index] - cell_target_perimeter)*element_perimeter_gradient;
-            }
-            // MA Force
-            else if (current_time < (10.0 + 1e-10))
-            {
-                myosin_activity = p_cell->GetMyosinActivity();
-                membrane_surface_tension_contribution -= 2*GetNagaiHondaMembraneSurfaceEnergyParameter()*myosin_activity*(element_perimeters[elem_index] - cell_target_perimeter)*element_perimeter_gradient;
-            }
-            // EMA Force
-            else
-            {
-                double sum1 = 0.0;
-                c_vector<double, DIM> sum2 = zero_vector<double>(DIM);;
-
-                unsigned this_node_index = p_element->GetNodeGlobalIndex(0);
-                for (unsigned i = 0; i < num_nodes_elem; i++)
-                {
-                    unsigned next_node_index = p_element->GetNodeGlobalIndex((i + 1) % num_nodes_elem);
-
-                    double edge_length = p_cell_population->rGetMesh().GetDistanceBetweenNodes(this_node_index, next_node_index);
-                    sum1 += sqrt(p_element->GetEdgeMyosinActivity(i))*edge_length;
-                    this_node_index = next_node_index;
-                }
-
-                sum2 += sqrt(p_element->GetEdgeMyosinActivity(previous_node_local_index))*previous_edge_gradient;
-                sum2 += sqrt(p_element->GetEdgeMyosinActivity(local_index))*next_edge_gradient;
-
-                membrane_surface_tension_contribution -= 2*GetNagaiHondaMembraneSurfaceEnergyParameter()*sum1*sum2;
-            }
+            membrane_surface_tension_contribution -= 2*GetNagaiHondaMembraneSurfaceEnergyParameter()*(element_perimeters[elem_index] - cell_target_perimeter)*element_perimeter_gradient;
         }
 
         c_vector<double, DIM> force_on_node = deformation_contribution + membrane_surface_tension_contribution + adhesion_contribution;
@@ -204,7 +163,7 @@ void MyEdgeMyosinActivityForce<DIM>::AddForceContribution(AbstractCellPopulation
 }
 
 template<unsigned DIM>
-double MyEdgeMyosinActivityForce<DIM>::GetAdhesionParameter(Node<DIM>* pNodeA, Node<DIM>* pNodeB, VertexBasedCellPopulation<DIM>& rVertexCellPopulation)
+double MyVoidEdgeMyosinActivityForce<DIM>::GetAdhesionParameter(Node<DIM>* pNodeA, Node<DIM>* pNodeB, VertexBasedCellPopulation<DIM>& rVertexCellPopulation)
 {
     // Find the indices of the elements owned by each node
     std::set<unsigned> elements_containing_nodeA = pNodeA->rGetContainingElementIndices();
@@ -233,55 +192,55 @@ double MyEdgeMyosinActivityForce<DIM>::GetAdhesionParameter(Node<DIM>* pNodeA, N
 }
 
 template<unsigned DIM>
-double MyEdgeMyosinActivityForce<DIM>::GetNagaiHondaDeformationEnergyParameter()
+double MyVoidEdgeMyosinActivityForce<DIM>::GetNagaiHondaDeformationEnergyParameter()
 {
     return mNagaiHondaDeformationEnergyParameter;
 }
 
 template<unsigned DIM>
-double MyEdgeMyosinActivityForce<DIM>::GetNagaiHondaMembraneSurfaceEnergyParameter()
+double MyVoidEdgeMyosinActivityForce<DIM>::GetNagaiHondaMembraneSurfaceEnergyParameter()
 {
     return mNagaiHondaMembraneSurfaceEnergyParameter;
 }
 
 template<unsigned DIM>
-double MyEdgeMyosinActivityForce<DIM>::GetNagaiHondaCellCellAdhesionEnergyParameter()
+double MyVoidEdgeMyosinActivityForce<DIM>::GetNagaiHondaCellCellAdhesionEnergyParameter()
 {
     return mNagaiHondaCellCellAdhesionEnergyParameter;
 }
 
 template<unsigned DIM>
-double MyEdgeMyosinActivityForce<DIM>::GetNagaiHondaCellBoundaryAdhesionEnergyParameter()
+double MyVoidEdgeMyosinActivityForce<DIM>::GetNagaiHondaCellBoundaryAdhesionEnergyParameter()
 {
     return mNagaiHondaCellBoundaryAdhesionEnergyParameter;
 }
 
 template<unsigned DIM>
-void MyEdgeMyosinActivityForce<DIM>::SetNagaiHondaDeformationEnergyParameter(double deformationEnergyParameter)
+void MyVoidEdgeMyosinActivityForce<DIM>::SetNagaiHondaDeformationEnergyParameter(double deformationEnergyParameter)
 {
     mNagaiHondaDeformationEnergyParameter = deformationEnergyParameter;
 }
 
 template<unsigned DIM>
-void MyEdgeMyosinActivityForce<DIM>::SetNagaiHondaMembraneSurfaceEnergyParameter(double membraneSurfaceEnergyParameter)
+void MyVoidEdgeMyosinActivityForce<DIM>::SetNagaiHondaMembraneSurfaceEnergyParameter(double membraneSurfaceEnergyParameter)
 {
     mNagaiHondaMembraneSurfaceEnergyParameter = membraneSurfaceEnergyParameter;
 }
 
 template<unsigned DIM>
-void MyEdgeMyosinActivityForce<DIM>::SetNagaiHondaCellCellAdhesionEnergyParameter(double cellCellAdhesionEnergyParameter)
+void MyVoidEdgeMyosinActivityForce<DIM>::SetNagaiHondaCellCellAdhesionEnergyParameter(double cellCellAdhesionEnergyParameter)
 {
     mNagaiHondaCellCellAdhesionEnergyParameter = cellCellAdhesionEnergyParameter;
 }
 
 template<unsigned DIM>
-void MyEdgeMyosinActivityForce<DIM>::SetNagaiHondaCellBoundaryAdhesionEnergyParameter(double cellBoundaryAdhesionEnergyParameter)
+void MyVoidEdgeMyosinActivityForce<DIM>::SetNagaiHondaCellBoundaryAdhesionEnergyParameter(double cellBoundaryAdhesionEnergyParameter)
 {
     mNagaiHondaCellBoundaryAdhesionEnergyParameter = cellBoundaryAdhesionEnergyParameter;
 }
 
 template<unsigned DIM>
-void MyEdgeMyosinActivityForce<DIM>::OutputForceParameters(out_stream& rParamsFile)
+void MyVoidEdgeMyosinActivityForce<DIM>::OutputForceParameters(out_stream& rParamsFile)
 {
     *rParamsFile << "\t\t\t<NagaiHondaDeformationEnergyParameter>" << mNagaiHondaDeformationEnergyParameter << "</NagaiHondaDeformationEnergyParameter>\n";
     *rParamsFile << "\t\t\t<NagaiHondaMembraneSurfaceEnergyParameter>" << mNagaiHondaMembraneSurfaceEnergyParameter << "</NagaiHondaMembraneSurfaceEnergyParameter>\n";
@@ -293,11 +252,10 @@ void MyEdgeMyosinActivityForce<DIM>::OutputForceParameters(out_stream& rParamsFi
 }
 
 // Explicit instantiation
-template class MyEdgeMyosinActivityForce<1>;
-template class MyEdgeMyosinActivityForce<2>;
-template class MyEdgeMyosinActivityForce<3>;
-
+template class MyVoidEdgeMyosinActivityForce<1>;
+template class MyVoidEdgeMyosinActivityForce<2>;
+template class MyVoidEdgeMyosinActivityForce<3>;
 
 // Serialization for Boost >= 1.36
 #include "SerializationExportWrapperForCpp.hpp"
-EXPORT_TEMPLATE_CLASS_SAME_DIMS(MyEdgeMyosinActivityForce)
+EXPORT_TEMPLATE_CLASS_SAME_DIMS(MyVoidEdgeMyosinActivityForce)

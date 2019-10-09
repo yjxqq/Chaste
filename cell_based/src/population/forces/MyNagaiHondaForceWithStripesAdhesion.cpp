@@ -40,7 +40,7 @@ MyNagaiHondaForceWithStripesAdhesion<DIM>::MyNagaiHondaForceWithStripesAdhesion(
    : AbstractForce<DIM>(),
      mNagaiHondaDeformationEnergyParameter(5.0), // This is 1.0 in the Nagai & Honda paper.
      mNagaiHondaMembraneSurfaceEnergyParameter(0.5), // This is 0.1 in the Nagai & Honda paper.
-     mNagaiHondaCellCellAdhesionEnergyParameter(0.0), // This corresponds to a value of 1.0 for
+     mNagaiHondaCellCellAdhesionEnergyParameter(-0.05), // This corresponds to a value of 1.0 for
                                                       // the sigma parameter in the Nagai & Honda
                                                       // paper. In the paper, the sigma value is
                                                       // set to 0.01.
@@ -85,12 +85,18 @@ void MyNagaiHondaForceWithStripesAdhesion<DIM>::AddForceContribution(AbstractCel
             // understandable message. There is a slight chance that the exception is thrown although the error is not about the
             // target areas.
             target_areas[elem_index] = p_cell_population->GetCellUsingLocationIndex(elem_index)->GetCellData()->GetItem("target area");
+            //My changes
+            //double current_time = SimulationTime::Instance()->GetTime();
+            //target_areas[elem_index] = 1.5*(1+current_time/150.0);
+            target_areas[elem_index] = 1.5;
         }
         catch (Exception&)
         {
             EXCEPTION("You need to add an AbstractTargetAreaModifier to the simulation in order to use NagaiHondaForce");
         }
+
     }
+
 
     // Iterate over vertices in the cell population
     for (unsigned node_index=0; node_index<num_nodes; node_index++)
@@ -133,7 +139,6 @@ void MyNagaiHondaForceWithStripesAdhesion<DIM>::AddForceContribution(AbstractCel
             // Add the force contribution from this cell's deformation energy (note the minus sign)
             c_vector<double, DIM> element_area_gradient = p_cell_population->rGetMesh().GetAreaGradientOfElementAtNode(p_element, local_index);
             deformation_contribution -= 2*GetNagaiHondaDeformationEnergyParameter()*(element_areas[elem_index] - target_areas[elem_index])*element_area_gradient;
-
             // Get the previous and next nodes in this element
             unsigned previous_node_local_index = (num_nodes_elem+local_index-1)%num_nodes_elem;
             Node<DIM>* p_previous_node = p_element->GetNode(previous_node_local_index);
@@ -166,7 +171,7 @@ void MyNagaiHondaForceWithStripesAdhesion<DIM>::AddForceContribution(AbstractCel
             double myosin_activity = 0.0;
 
             // Nagai Honda Force
-            if (current_time < (1000.0 + 1e-10))
+            if (current_time < (10000.0 + 1e-10))
             {
                 membrane_surface_tension_contribution -= 2*GetNagaiHondaMembraneSurfaceEnergyParameter()*1.0*(element_perimeters[elem_index] - cell_target_perimeter)*element_perimeter_gradient;
             }
@@ -210,16 +215,18 @@ void MyNagaiHondaForceWithStripesAdhesion<DIM>::AddForceContribution(AbstractCel
             else
             {
                 // Parameters
-                double stripe_width = 0.5;
-                double stripe_distance = 7.5;
-                double initial_height = 0.5;
-                //double initial_height = sqrt(3)/2;
-                double adhesive_area_parameter = -10.0;
-                double possible_cell_length = 1.5;
-                unsigned sample_num = 31*31;
-                double small_change = 0.1;
-                //bool adhesive_area_parameter_can_change = false;
-                bool adhesive_area_parameter_can_change = true;
+                double stripe_width = 4.0;
+                double stripe_distance = 8.0;
+                //double initial_height = 0.5;
+                double initial_height = 0.0;
+                //double initial_height = 1/sqrt(3)*1.5*10;
+                double adhesive_area_parameter = -20.0;
+                //double adhesive_area_parameter = 0.0;
+                double possible_cell_length = 2.0;
+                unsigned sample_num = 20*20;
+                double small_change = 0.05;
+                bool adhesive_area_parameter_can_change = false;
+                //bool adhesive_area_parameter_can_change = true;
 
                 c_vector<double, DIM> centroid = p_cell_population->rGetMesh().GetCentroidOfElement(elem_index);
                 int floornum = floor((centroid[0] - stripe_width/2.0)/stripe_distance);
@@ -252,7 +259,10 @@ void MyNagaiHondaForceWithStripesAdhesion<DIM>::AddForceContribution(AbstractCel
                 else if (possible_cell_left<stripe_left)
                 {
                     sample_area_left = stripe_left;
-                    sample_area_right = possible_cell_right;
+                    if (possible_cell_right<stripe_right)
+                        sample_area_right = possible_cell_right;
+                    else
+                        sample_area_right = stripe_right;
                 }
                 else if (possible_cell_right<stripe_right)
                 {
@@ -268,9 +278,10 @@ void MyNagaiHondaForceWithStripesAdhesion<DIM>::AddForceContribution(AbstractCel
                     has_adhesive_area = false;
                 //std::cout << centroid[0] << ' ' << centroid[1] << '\n';
                 //std::cout << sample_area_left << ' ' << sample_area_right << ' ' << sample_area_bottom << ' ' << sample_area_top << '\n';
-
+                // Attention
                 c_vector<double, DIM> adhesive_area_gradient = zero_vector<double>(DIM);
                 c_vector<double, DIM> weighted_adhesive_area_gradient = zero_vector<double>(DIM);
+
                 if (has_adhesive_area)
                 {
                     c_vector<c_vector<double, DIM>, 12> points;
@@ -364,27 +375,22 @@ void MyNagaiHondaForceWithStripesAdhesion<DIM>::AddForceContribution(AbstractCel
                         adhesive_area_gradient += (adhesive_area1 - adhesive_area)/small_change*small_vector;
                         weighted_adhesive_area_gradient += (weighted_adhesive_area1 - weighted_adhesive_area)/small_change*small_vector;
                     }
+
                 }// end of statement 'if (has_adhesive_area)'
 
                 if (adhesive_area_parameter_can_change == false)
                     area_adhesion_contribution -= adhesive_area_parameter*adhesive_area_gradient;
                 else
                     area_adhesion_contribution -= adhesive_area_parameter*weighted_adhesive_area_gradient;
-
+                //*******
+                //std::cout << -adhesive_area_parameter*weighted_adhesive_area_gradient[0] << '\n';
             }
         }// end of 'Iterate over these elements'
-
-        /*if (rand()%100 == 1)
-        {
-            std::cout<< deformation_contribution[0] << ' ' << deformation_contribution[1] << ' ' << membrane_surface_tension_contribution[0] << ' ' << membrane_surface_tension_contribution[1] << ' ';
-            std::cout<< adhesion_contribution[0] << ' ' << adhesion_contribution[1] << ' ' << area_adhesion_contribution[0] << ' ' << area_adhesion_contribution[1] << '\n';
-        }
-        */
 
         c_vector<double, DIM> force_on_node = deformation_contribution + membrane_surface_tension_contribution + adhesion_contribution +area_adhesion_contribution;
 
         // My changes: random force
-        /*double motility = 0.1;
+        /*double motility = 0.4;
         double Dr = 0.1;
 
         double U1 = (rand()%100)/double(100);
@@ -398,13 +404,18 @@ void MyNagaiHondaForceWithStripesAdhesion<DIM>::AddForceContribution(AbstractCel
         random_force_angle += angle_change;
         p_cell_population->GetNode(node_index)->SetRandomForceAngle(random_force_angle);
         c_vector<double, DIM> random_force = zero_vector<double>(DIM);
+        //random_force_angle = M_PI/2;
         random_force[0] = motility*cos(random_force_angle);
         random_force[1] = motility*sin(random_force_angle);
         //std::cout << random_force[0] << ' '<< motility << " " << random_force_angle << ' '<< cos(random_force_angle) << '\n';
-        //force_on_node += zero_vector<double>(DIM);
-        force_on_node += random_force;
-        */
 
+        //force_on_node = zero_vector<double>(DIM);
+        force_on_node += random_force;
+        //force_on_node += zero_vector<double>(DIM);
+*/
+        /************************/
+        /*std::cout << norm_2(deformation_contribution) << ' ' << norm_2(membrane_surface_tension_contribution) << ' ' << norm_2(adhesion_contribution) << ' ' << norm_2(area_adhesion_contribution) << ' ' << norm_2(random_force) << ' ' << area_adhesion_contribution[0] << '\n' ;
+*/
 
 
         p_cell_population->GetNode(node_index)->AddAppliedForceContribution(force_on_node);

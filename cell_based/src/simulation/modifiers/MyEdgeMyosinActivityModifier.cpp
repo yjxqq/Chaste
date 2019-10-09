@@ -98,19 +98,19 @@ void MyEdgeMyosinActivityModifier::UpdateEdgeMyosinActivitiesAndSurfaceAreaHisto
         double new_edge_myosin_activity = 0.0;
 
         // CMA == 1.0
-        if (current_time<(10.0- 1e-10))
+        if (current_time<(-10.0- 1e-10))
         {
 
         }
         // modify Cell Myosin Activity
-        else if (current_time < (51.0- 1e-10))
+        else if (current_time < (10.0- 1e-10))
         {
             myosin_activity = p_cell->GetMyosinActivity();
             new_myosin_activity = myosin_activity+ SimulationTime::Instance()->GetTimeStep()*(2.0*pow(previous_element_primeter,8.0)/(1.0*pow(2.063,8.0)+pow(previous_element_primeter,8.0))-myosin_activity);// notice 'pow(2.063,8.0)' in the statement
             p_cell->SetMyosinActivity(new_myosin_activity);
         }
         // initialise Edge Myosin Activity
-        else if (current_time < (15.0 + 1e-10))
+        else if (current_time < (10.0 + 1e-10))
         {
             myosin_activity = p_cell->GetMyosinActivity();
             new_myosin_activity = myosin_activity+ SimulationTime::Instance()->GetTimeStep()*(2.0*pow(previous_element_primeter,8.0)/(1.0*pow(2.063,8.0)+pow(previous_element_primeter,8.0))-myosin_activity);

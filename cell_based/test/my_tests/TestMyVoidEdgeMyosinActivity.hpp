@@ -33,8 +33,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef TESTMYSTRIPESADHESIONSIMULATION_HPP_
-#define TESTMYSTRIPESADHESIONSIMULATION_HPP_
+#ifndef TESTMYVOIDEDGEMYOSINACTIVITY_HPP_
+#define TESTMYVOIDEDGEMYOSINACTIVITY_HPP_
 
 #include <cxxtest/TestSuite.h>
 #include "CheckpointArchiveTypes.hpp"
@@ -56,81 +56,46 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MyCircleBoundaryCondition.hpp"
 #include "PlaneBoundaryCondition.hpp"
 #include "ToroidalHoneycombVertexMeshGenerator.hpp"
+#include "VoidVertexMeshGenerator.hpp"
 #include "NagaiHondaForce.hpp"
-#include "MyNagaiHondaForceWithStripesAdhesion.hpp"
-#include "MyTimeRelatedPlaneBoundaryCondition.hpp"
+#include "MyVoidEdgeMyosinActivityForce.hpp"
 
-class TestMyStripesAdhesionSimulation : public AbstractCellBasedTestSuite
+class TestMyVoidEdgeMyosinActivity : public AbstractCellBasedTestSuite
 {
 public:
 
     void TestOscillation()
     {
-        double rest_area = sqrt(3)/2/pow(1.25,2);
-        //double rest_area = sqrt(3)/2;
-        double initial_area = rest_area;
-        unsigned num_ele_cross = 25;
-        unsigned num_ele_up = 8;
-        HoneycombVertexMeshGenerator generator(num_ele_cross, num_ele_up, false, 0.01, 0.001, initial_area);    // Parameters are: cells across, cells up
+        VoidVertexMeshGenerator generator(3, 6);    // Parameters are: cells across, cells up
         MutableVertexMesh<2,2>* p_mesh = generator.GetMesh();
-        //double length = (num_ele_cross+0.5)*sqrt(initial_area*2/sqrt(3));
-        double length = (num_ele_cross)*sqrt(initial_area*2/sqrt(3));
-
-        double height = (num_ele_up*sqrt(3)/2+1/sqrt(3)/2)*sqrt(initial_area*2/sqrt(3));
 
         std::vector<CellPtr> cells;
         MAKE_PTR(TransitCellProliferativeType, p_transit_type);
         CellsGenerator<UniformG1GenerationalCellCycleModel, 2> cells_generator;
-        double stop_proliferate_time = 0.0;
+        double stop_proliferate_time = -10.0;
         cells_generator.GenerateBasicRandomWithStopProliferateTime(cells, p_mesh->GetNumElements(), stop_proliferate_time, p_transit_type);
 
         VertexBasedCellPopulation<2> cell_population(*p_mesh, cells);
-        //***********Attention****************************************************
-        cell_population.SetRestrictVertexMovementBoolean(false);
 
         OffLatticeSimulation<2> simulator(cell_population);
-        simulator.SetOutputDirectory("MyStripesAdhesionSimulation");
-        simulator.SetEndTime(300.0);
-        simulator.SetDt(0.05);
+        simulator.SetOutputDirectory("MyVoidEdgeMyosinActivity");
+        simulator.SetEndTime(20);
+        simulator.SetDt(0.01);
+
         simulator.SetSamplingTimestepMultiple(5);
 
-        MAKE_PTR(MyNagaiHondaForceWithStripesAdhesion<2>, p_force);
+        MAKE_PTR(MyEdgeMyosinActivityForce<2>, p_force);
         simulator.AddForce(p_force);
 
-        MAKE_PTR_ARGS(SimpleTargetAreaModifier<2>, p_growth_modifier, (1.5));
+        MAKE_PTR(SimpleTargetAreaModifier<2>, p_growth_modifier);
         simulator.AddSimulationModifier(p_growth_modifier);
 
-        //MAKE_PTR(MyEdgeMyosinActivityModifier, p_my_modifier);
-        //simulator.AddSimulationModifier(p_my_modifier);
-
-        c_vector<double,2> point = zero_vector<double>(2);
-        c_vector<double,2> normal = zero_vector<double>(2);
-        normal(1) = -1.0;
-        MAKE_PTR_ARGS(PlaneBoundaryCondition<2>, p_bc, (&cell_population, point, normal));
-        simulator.AddCellPopulationBoundaryCondition(p_bc);
-
-        normal(0) = -1.0;
-        normal(1) = 0.0;
-        MAKE_PTR_ARGS(PlaneBoundaryCondition<2>, p_bc2, (&cell_population, point, normal));
-        simulator.AddCellPopulationBoundaryCondition(p_bc2);
-
-        point(0) = length;
-        normal(0) = 1.0;
-        normal(1) = 0.0;
-        MAKE_PTR_ARGS(PlaneBoundaryCondition<2>, p_bc3, (&cell_population, point, normal));
-        simulator.AddCellPopulationBoundaryCondition(p_bc3);
-
-        point(0) = 0.0;
-        point(1) = height;
-        normal(0) = 0.0;
-        normal(1) = 1.0;
-        double release_boundary_time = 0.0 - 1e-10;
-        MAKE_PTR_ARGS(MyTimeRelatedPlaneBoundaryCondition<2>, p_bc4, (&cell_population, point, normal, release_boundary_time));
-        simulator.AddCellPopulationBoundaryCondition(p_bc4);
+        MAKE_PTR(MyEdgeMyosinActivityModifier, p_my_modifier);
+        simulator.AddSimulationModifier(p_my_modifier);
 
         simulator.Solve();
     }
 
 };
 
-#endif /* TESTMYSTRIPESADHESIONSIMULATION_HPP_ */
+#endif /* TESTMYVOIDEDGEMYOSINACTIVITY_HPP_ */
